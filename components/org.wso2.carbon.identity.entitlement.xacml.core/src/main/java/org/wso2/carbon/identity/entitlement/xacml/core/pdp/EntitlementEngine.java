@@ -19,7 +19,6 @@ package org.wso2.carbon.identity.entitlement.xacml.core.pdp;
 
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.annotations.Activate;
-import org.osgi.service.component.annotations.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wso2.balana.Balana;
@@ -32,6 +31,7 @@ import org.wso2.balana.finder.PolicyFinderModule;
 import org.wso2.balana.finder.ResourceFinder;
 import org.wso2.balana.finder.ResourceFinderModule;
 import org.wso2.carbon.identity.entitlement.xacml.core.EntitlementUtil;
+import org.wso2.carbon.identity.entitlement.xacml.core.dto.PolicyStoreDTO;
 import org.wso2.carbon.identity.entitlement.xacml.core.policy.finder.CarbonPolicyFinder;
 
 import java.util.ArrayList;
@@ -39,10 +39,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@Component(
-        name = "org.wso2.carbon.identity.entitlement.xacml.core.pdp.EntitlementEngine",
-        immediate = true
-)
 public class EntitlementEngine {
 
     private PDP pdp;
@@ -135,5 +131,13 @@ public class EntitlementEngine {
         carbonPolicyFinder.setModules(policyModules);
         carbonPolicyFinder.init();
 
+    }
+
+    public void updatePolicyCollection(PolicyStoreDTO policyStoreDTO, String action){
+        Set modules = carbonPolicyFinder.getModules();
+        modules.forEach(module -> {
+            CarbonPolicyFinder policyFinder = (CarbonPolicyFinder) module;
+            policyFinder.updatePolicyCollection(policyStoreDTO, action);
+        });
     }
 }

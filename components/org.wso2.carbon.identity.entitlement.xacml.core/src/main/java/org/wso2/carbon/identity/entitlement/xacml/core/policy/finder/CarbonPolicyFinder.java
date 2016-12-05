@@ -38,8 +38,8 @@ import org.wso2.carbon.identity.entitlement.xacml.core.PolicyOrderComparator;
 import org.wso2.carbon.identity.entitlement.xacml.core.dto.PolicyStoreDTO;
 import org.wso2.carbon.identity.entitlement.xacml.core.exception.EntitlementException;
 import org.wso2.carbon.identity.entitlement.xacml.core.policy.PolicyReader;
+import org.wso2.carbon.identity.entitlement.xacml.core.policy.collection.DefaultPolicyCollection;
 import org.wso2.carbon.identity.entitlement.xacml.core.policy.collection.PolicyCollection;
-import org.wso2.carbon.identity.entitlement.xacml.core.policy.collection.SimplePolicyCollection;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -127,11 +127,11 @@ public class CarbonPolicyFinder extends org.wso2.balana.finder.PolicyFinderModul
         // get policy collection
 //        Map<PolicyCollection, Properties> policyCollections = EntitlementServiceComponent.
 //                getEntitlementConfig().getPolicyCollections();
-        Map<PolicyCollection, Properties>  policyCollections = null;
+        Map<PolicyCollection, Properties> policyCollections = null;
         if (policyCollections != null && policyCollections.size() > 0) {
             tempPolicyCollection = policyCollections.entrySet().iterator().next().getKey();
         } else {
-            tempPolicyCollection = new SimplePolicyCollection();
+            tempPolicyCollection = new DefaultPolicyCollection(policyCombiningAlgorithm);
         }
 
         // get policy reader
@@ -221,66 +221,6 @@ public class CarbonPolicyFinder extends org.wso2.balana.finder.PolicyFinderModul
     @Override
     public PolicyFinderResult findPolicy(EvaluationCtx context) {
 
-//        if (EntitlementEngine.getInstance().getPolicyCache().isInvalidate()) {
-//
-//            init(this.finder);
-//            policyReferenceCache.clear();
-//            EntitlementEngine.getInstance().clearDecisionCache();
-//            if (logger.isDebugEnabled()) {
-//                int tenantId = CarbonContext.getThreadLocalCarbonContext().getTenantId();
-//                logger.debug("Invalidation cache message is received. " +
-//                          "Re-initialized policy finder module of current node and invalidate decision " +
-//                          "caching for tenantId : " + tenantId);
-//            }
-//        } else {
-//            Collection<PolicyStatus> policies =
-//                    EntitlementEngine.getInstance().getPolicyCache().getInvalidatedPolicies();
-//            if (policies != null) {
-//                if (policies.size() > 0) {
-//                    synchronized (policies) {
-//                        boolean isReorder = false;
-//                        policyReferenceCache.clear();
-//                        EntitlementEngine.getInstance().clearDecisionCache();
-//                        for (PolicyStatus policyStatus : policies) {
-//
-//                            if (EntitlementConstants.PolicyPublish.ACTION_DELETE
-//                                    .equals(policyStatus.getPolicyAction())) {
-//                                policyCollection.deletePolicy(policyStatus.getPolicyId());
-//                                policyCollectionOrder.remove(new PolicyStoreDTO(policyStatus.getPolicyId()));
-//                            } else if (EntitlementConstants.PolicyPublish.ACTION_UPDATE
-//                                    .equals(policyStatus.getPolicyAction())) {
-//                                AbstractPolicy abstractPolicy = loadPolicy(policyStatus.getPolicyId());
-//                                policyCollection.addPolicy(abstractPolicy);
-//                            } else if (EntitlementConstants.PolicyPublish.ACTION_CREATE
-//                                    .equals(policyStatus.getPolicyAction())) {
-//                                AbstractPolicy abstractPolicy = loadPolicy(policyStatus.getPolicyId());
-//                                policyCollection.addPolicy(abstractPolicy);
-//                                isReorder = true;
-//                            } else if (EntitlementConstants.PolicyPublish.ACTION_ORDER
-//                                    .equals(policyStatus.getPolicyAction())) {
-//                                int order = getPolicyOrder(policyStatus.getPolicyId());
-//                                if (order != -1) {
-//                                    PolicyStoreDTO policyDTO = new PolicyStoreDTO(policyStatus.getPolicyId());
-//                                    if (policyCollectionOrder.indexOf(policyDTO) != -1) {
-//                                        policyCollectionOrder.get(policyCollectionOrder.indexOf(policyDTO))
-//                                                .setPolicyOrder(order);
-//                                        isReorder = true;
-//                                    }
-//                                }
-//                            }
-//
-//                        }
-//                        if (isReorder) {
-//                            orderPolicyCache();
-//                        }
-//                        policies.clear();
-//                    }
-//
-//
-//                }
-//            }
-//        }
-
         try {
             AbstractPolicy policy = policyCollection.getEffectivePolicy(context);
             if (policy == null) {
@@ -361,6 +301,40 @@ public class CarbonPolicyFinder extends org.wso2.balana.finder.PolicyFinderModul
         }
 
         return new PolicyFinderResult();
+    }
+
+    public void updatePolicyCollection(PolicyStoreDTO policyStoreDTO, String action) {
+        boolean isReorder = false;
+
+        if (EntitlementConstants.PolicyPublish.ACTION_DELETE
+                .equals(action)) {
+            policyCollection.deletePolicy(policyStoreDTO.getPolicyId());
+            policyCollectionOrder.remove(policyStoreDTO);
+        } else if (EntitlementConstants.PolicyPublish.ACTION_UPDATE
+                .equals(action)) {
+            AbstractPolicy abstractPolicy = loadPolicy(policyStoreDTO.getPolicyId());
+            policyCollection.addPolicy(abstractPolicy);
+        } else if (EntitlementConstants.PolicyPublish.ACTION_CREATE
+                .equals(action)) {
+            AbstractPolicy abstractPolicy = loadPolicy(policyStoreDTO.getPolicyId());
+            policyCollection.addPolicy(abstractPolicy);
+            isReorder = true;
+        } else if (EntitlementConstants.PolicyPublish.ACTION_ORDER
+                .equals(action)) {
+            int order = getPolicyOrder(policyStoreDTO.getPolicyId());
+            if (order != -1) {
+                if (policyCollectionOrder.indexOf(policyStoreDTO) != -1) {
+                    policyCollectionOrder.get(policyCollectionOrder.indexOf(policyStoreDTO))
+                            .setPolicyOrder(order);
+                    isReorder = true;
+                }
+            }
+        }
+
+
+        if (isReorder) {
+            orderPolicyCache();
+        }
     }
 
 //    public void clearPolicyCache() {

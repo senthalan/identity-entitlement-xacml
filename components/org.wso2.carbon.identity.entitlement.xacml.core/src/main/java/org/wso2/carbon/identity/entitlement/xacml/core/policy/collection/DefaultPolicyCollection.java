@@ -33,7 +33,6 @@ import org.wso2.balana.ctx.EvaluationCtx;
 import org.wso2.balana.ctx.Status;
 import org.wso2.balana.xacml2.Target;
 import org.wso2.balana.xacml2.TargetSection;
-import org.wso2.carbon.identity.entitlement.xacml.core.EntitlementLRUCache;
 import org.wso2.carbon.identity.entitlement.xacml.core.exception.EntitlementException;
 
 import java.io.Serializable;
@@ -72,22 +71,6 @@ public class DefaultPolicyCollection implements PolicyCollection {
     private PolicyCombiningAlgorithm combiningAlg;
     // the optional policy id used when wrapping multiple policies
     private URI parentId;
-    private int maxInMemoryPolicies;
-
-    ;
-
-    /**
-     * Creates a new <code>DefaultPolicyCollection</code> that will return errors when multiple policies
-     * match for a given request.
-     *
-     * @param combiningAlg        Policy combining Algorithm
-     * @param maxInMemoryPolicies maximum no of policies that keeps in memory
-     */
-    public DefaultPolicyCollection(PolicyCombiningAlgorithm combiningAlg, int maxInMemoryPolicies) {
-        policies = new EntitlementLRUCache<>(maxInMemoryPolicies);
-        this.maxInMemoryPolicies = maxInMemoryPolicies;
-        this.combiningAlg = combiningAlg;
-    }
 
     /**
      * Creates a new <code>DefaultPolicyCollection</code> that will return errors when multiple policies
@@ -96,7 +79,7 @@ public class DefaultPolicyCollection implements PolicyCollection {
      * @param combiningAlg Policy combining Algorithm
      */
     public DefaultPolicyCollection(PolicyCombiningAlgorithm combiningAlg) {
-        policies = new LinkedHashMap<String, TreeSet<AbstractPolicy>>();
+        policies = new LinkedHashMap<>();
         this.combiningAlg = combiningAlg;
     }
 
@@ -108,7 +91,7 @@ public class DefaultPolicyCollection implements PolicyCollection {
      * @param parentPolicyId the identifier to use for the new PolicySet
      */
     public DefaultPolicyCollection(PolicyCombiningAlgorithm combiningAlg, URI parentPolicyId) {
-        policies = new LinkedHashMap<String, TreeSet<AbstractPolicy>>();
+        policies = new LinkedHashMap<>();
         this.combiningAlg = combiningAlg;
         this.parentId = parentPolicyId;
     }

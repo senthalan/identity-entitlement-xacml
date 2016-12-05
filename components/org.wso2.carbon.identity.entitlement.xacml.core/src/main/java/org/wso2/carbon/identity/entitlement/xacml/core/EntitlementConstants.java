@@ -17,4 +17,19 @@ public class EntitlementConstants {
     public static final String POLICY_REFERENCE = "policyIdReferences";
 
     public static final String POLICY_SET_REFERENCE = "policySetIdReferences";
+
+    public static final class PolicyPublish {
+
+        public static final String ACTION_CREATE = "CREATE";
+
+        public static final String ACTION_UPDATE = "UPDATE";
+
+        public static final String ACTION_DELETE = "DELETE";
+
+        public static final String ACTION_ENABLE = "ENABLE";
+
+        public static final String ACTION_DISABLE = "DISABLE";
+
+        public static final String ACTION_ORDER = "ORDER";
+    }
 }
