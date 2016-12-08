@@ -51,6 +51,11 @@
             <groupId>org.apache.axiom</groupId>
             <artifactId>com.springsource.org.apache.axiom</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.wso2.carbon</groupId>
+            <artifactId>javax.cache.wso2</artifactId>
+            <version>4.5.0-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 
     <properties>
@@ -72,7 +77,8 @@
             org.wso2.balana.*; version="${balana.import.version.range}",
             org.apache.xerces.util,
             org.apache.axiom.om.*,
-            javax.xml.*
+            javax.xml.*,
+            javax.cache.*,
         </import.package>
 
         <carbon.component>

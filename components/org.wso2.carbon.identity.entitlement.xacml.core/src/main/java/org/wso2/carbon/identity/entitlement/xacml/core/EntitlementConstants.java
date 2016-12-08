@@ -65,4 +65,11 @@ public class EntitlementConstants {
     public static final String SEARCH_WARNING_MESSAGE3 = "Attribute Selector Element is contained with Xpath expression";
 
     public static final String SEARCH_WARNING_MESSAGE4 = "Apply Element is not contained within Condition Element";
+
+
+    /**
+     *  caching names
+     */
+    public static final String PDP_SIMPLE_DECISION_CACHE = "PDP_SIMPLE_DECISION_CACHE";
+
 }
